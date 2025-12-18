@@ -235,7 +235,7 @@ const ResultsTable = ({
                         ${
                           result.finding_confidence < 50
                             ? "text-red-500"
-                            : result.finding_confidence < 90
+                            : result.finding_confidence < 70
                             ? "text-yellow-500"
                             : "text-green-500"
                         }`}

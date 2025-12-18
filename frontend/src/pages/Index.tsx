@@ -28,6 +28,7 @@ interface StreamData {
   error?: string;
   type?: string;
   status?: string;
+  message?: string;
 }
 
 const isErrorData = (data: unknown): data is ErrorData => {
@@ -42,7 +43,8 @@ const isErrorData = (data: unknown): data is ErrorData => {
 const processStreamData = (
   data: unknown,
   results: AnalysisResult[],
-  onError?: (error: string) => void
+  onError?: (error: string) => void,
+  onStatusChange?: (status: string, message?: string) => void
 ): AnalysisResult[] => {
   if (isErrorData(data)) {
     const errorMsg = `Backend Error: ${data.error}`;
@@ -52,7 +54,19 @@ const processStreamData = (
   }
 
   const streamData = data as StreamData;
+  
+  if (streamData.status === "queueing") {
+    onStatusChange?.("queueing", streamData.message);
+    return results;
+  }
+
+  if (streamData.status === "processing") {
+    onStatusChange?.("processing", streamData.message);
+    return results;
+  }
+
   if (streamData.status === "done") {
+    onStatusChange?.(null);
     return results;
   }
 
@@ -104,6 +118,8 @@ const Index = () => {
     setVideoTimestamp,
     currentVideoTime,
     setCurrentVideoTime,
+    processingStatus,
+    setProcessingStatus,
     abortController,
     setAbortController,
     isStreaming,
@@ -274,6 +290,8 @@ const Index = () => {
           const updated = processStreamData(data, prev, (errorMsg) => {
             setError(errorMsg);
             hasError = true;
+          }, (status, message) => {
+            setProcessingStatus(message || null);
           });
           return updated;
         });
@@ -346,6 +364,17 @@ const Index = () => {
                   currentTime={videoTimestamp}
                   onTimeUpdate={setCurrentVideoTime}
                 />
+              </div>
+            </div>
+          )}
+
+          {processingStatus && (
+            <div className="border border-blue-500 bg-blue-50 dark:bg-blue-950 dark:border-blue-700 rounded-lg p-4 flex items-center gap-3">
+              <div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <div>
+                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                  {processingStatus}
+                </p>
               </div>
             </div>
           )}

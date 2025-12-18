@@ -8,13 +8,13 @@ import uuid
 from utils.load_model import initialize_worker_models
 from contextlib import asynccontextmanager
 from classification.process_video_pipeline import stream_processing
-
+import asyncio
 from fastapi.middleware.cors import CORSMiddleware
-
+from configs.constant import MAX_CONCURRENT_VIDEO, NUM_WORKERS
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("--- Server starting up... Creating Process Pool ---")
-    pool = ProcessPoolExecutor(max_workers=2,initializer=initialize_worker_models)
+    pool = ProcessPoolExecutor(max_workers=NUM_WORKERS,initializer=initialize_worker_models)
     app.state.pool = pool
     print("--- Process Pool created ---")
 
@@ -34,6 +34,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+semaphore=asyncio.Semaphore(MAX_CONCURRENT_VIDEO)
+
 @app.post("/predict")
 async def predict(request: Request,file: UploadFile = File(...),
                   is_gastroscopy: bool = Query(...)):
@@ -46,5 +48,5 @@ async def predict(request: Request,file: UploadFile = File(...),
     
     print(f"File saved to: {tmp_path}")
 
-    return StreamingResponse(stream_processing(str(tmp_path), is_gastroscopy, request.app.state.pool), 
+    return StreamingResponse(stream_processing(str(tmp_path), is_gastroscopy, request.app.state.pool, semaphore), 
                              media_type="text/event-stream")

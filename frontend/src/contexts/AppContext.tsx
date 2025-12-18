@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useCallback,
   useRef,
+  useMemo,
 } from "react";
 import { AnalysisResult } from "@/components/ResultsTable";
 
@@ -16,6 +17,7 @@ interface AppContextType {
   error: string | null;
   videoTimestamp: number | undefined;
   currentVideoTime: number;
+  processingStatus: string | null;
 
   abortController: AbortController | null;
   isStreaming: boolean;
@@ -29,6 +31,7 @@ interface AppContextType {
   setError: (error: string | null) => void;
   setVideoTimestamp: (timestamp: number | undefined) => void;
   setCurrentVideoTime: (time: number) => void;
+  setProcessingStatus: (status: string | null) => void;
   setAbortController: (controller: AbortController | null) => void;
   setIsStreaming: (streaming: boolean) => void;
 
@@ -52,6 +55,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     undefined
   );
   const [currentVideoTime, setCurrentVideoTime] = useState(0);
+  const [processingStatus, setProcessingStatus] = useState<string | null>(null);
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -113,35 +117,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     setVideoTimestamp(undefined);
     setCurrentVideoTime(0);
     setIsLoading(false);
+    setProcessingStatus(null);
 
     localStorage.removeItem("analysisAppState");
     fileCache.current.clear();
+
+    globalThis.location.reload();
   }, [terminateStream]);
 
-  const value: AppContextType = {
-    analysisType,
-    selectedFile,
-    results,
-    isLoading,
-    error,
-    videoTimestamp,
-    currentVideoTime,
-    abortController,
-    isStreaming,
+  const value: AppContextType = useMemo(
+    () => ({
+      analysisType,
+      selectedFile,
+      results,
+      isLoading,
+      error,
+      videoTimestamp,
+      currentVideoTime,
+      processingStatus,
+      abortController,
+      isStreaming,
 
-    setAnalysisType,
-    setSelectedFile,
-    setResults,
-    setIsLoading,
-    setError,
-    setVideoTimestamp,
-    setCurrentVideoTime,
-    setAbortController,
-    setIsStreaming,
+      setAnalysisType,
+      setSelectedFile,
+      setResults,
+      setIsLoading,
+      setError,
+      setVideoTimestamp,
+      setCurrentVideoTime,
+      setProcessingStatus,
+      setAbortController,
+      setIsStreaming,
 
-    terminateStream,
-    resetState,
-  };
+      terminateStream,
+      resetState,
+    }),
+    [
+      analysisType,
+      selectedFile,
+      results,
+      isLoading,
+      error,
+      videoTimestamp,
+      currentVideoTime,
+      abortController,
+      isStreaming,
+      terminateStream,
+      resetState,
+    ]
+  );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
