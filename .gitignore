@@ -1,0 +1,19 @@
+#BE
+backend/.env
+/backend/__pycache__
+/backend/configs/__pycache__
+/backend/classification/__pycache__
+/backend/helper/__pycache__
+/backend/models
+/backend/utils/__pycache__
+
+# FE
+/frontend/node_modules
+/frontend/__pycache__
+/frontend/components/__pycache__
+/frontend/utils/__pycache__
+/frontend/.DS_Store
+/frontend/bun.lockb
+
+
+/.vscode
