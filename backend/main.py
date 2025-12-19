@@ -34,7 +34,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-semaphore=asyncio.Semaphore(MAX_CONCURRENT_VIDEO)
+video_semaphore=asyncio.Semaphore(MAX_CONCURRENT_VIDEO)
 
 @app.post("/predict")
 async def predict(request: Request,file: UploadFile = File(...),
@@ -48,5 +48,5 @@ async def predict(request: Request,file: UploadFile = File(...),
     
     print(f"File saved to: {tmp_path}")
 
-    return StreamingResponse(stream_processing(str(tmp_path), is_gastroscopy, request.app.state.pool, semaphore), 
+    return StreamingResponse(stream_processing(str(tmp_path), is_gastroscopy, request.app.state.pool, video_semaphore), 
                              media_type="text/event-stream")

@@ -69,10 +69,8 @@ def consumer(is_gastro, frames, start_time, end_time):
 
 async def stream_processing(video_path, is_gastro, process_pool, semaphore):
     
-    yield f"data: {json.dumps({'status': 'queueing', 'message': 'Server is busy, waiting for a slot...'})}\n"
     try:
         async with semaphore:
-            yield f"data: {json.dumps({'status': 'processing', 'message': 'Processing started'})}\n"
     
             loop = asyncio.get_event_loop()
     

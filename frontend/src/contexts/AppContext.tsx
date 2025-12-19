@@ -17,7 +17,6 @@ interface AppContextType {
   error: string | null;
   videoTimestamp: number | undefined;
   currentVideoTime: number;
-  processingStatus: string | null;
 
   abortController: AbortController | null;
   isStreaming: boolean;
@@ -31,10 +30,8 @@ interface AppContextType {
   setError: (error: string | null) => void;
   setVideoTimestamp: (timestamp: number | undefined) => void;
   setCurrentVideoTime: (time: number) => void;
-  setProcessingStatus: (status: string | null) => void;
   setAbortController: (controller: AbortController | null) => void;
   setIsStreaming: (streaming: boolean) => void;
-
   terminateStream: () => void;
   resetState: () => void;
 }
@@ -55,7 +52,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     undefined
   );
   const [currentVideoTime, setCurrentVideoTime] = useState(0);
-  const [processingStatus, setProcessingStatus] = useState<string | null>(null);
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -117,7 +113,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     setVideoTimestamp(undefined);
     setCurrentVideoTime(0);
     setIsLoading(false);
-    setProcessingStatus(null);
 
     localStorage.removeItem("analysisAppState");
     fileCache.current.clear();
@@ -134,7 +129,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       error,
       videoTimestamp,
       currentVideoTime,
-      processingStatus,
       abortController,
       isStreaming,
 
@@ -145,7 +139,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       setError,
       setVideoTimestamp,
       setCurrentVideoTime,
-      setProcessingStatus,
       setAbortController,
       setIsStreaming,
 

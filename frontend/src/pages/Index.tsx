@@ -28,7 +28,6 @@ interface StreamData {
   error?: string;
   type?: string;
   status?: string;
-  message?: string;
 }
 
 const isErrorData = (data: unknown): data is ErrorData => {
@@ -43,8 +42,7 @@ const isErrorData = (data: unknown): data is ErrorData => {
 const processStreamData = (
   data: unknown,
   results: AnalysisResult[],
-  onError?: (error: string) => void,
-  onStatusChange?: (status: string, message?: string) => void
+  onError?: (error: string) => void
 ): AnalysisResult[] => {
   if (isErrorData(data)) {
     const errorMsg = `Backend Error: ${data.error}`;
@@ -54,19 +52,8 @@ const processStreamData = (
   }
 
   const streamData = data as StreamData;
-  
-  if (streamData.status === "queueing") {
-    onStatusChange?.("queueing", streamData.message);
-    return results;
-  }
-
-  if (streamData.status === "processing") {
-    onStatusChange?.("processing", streamData.message);
-    return results;
-  }
 
   if (streamData.status === "done") {
-    onStatusChange?.(null);
     return results;
   }
 
@@ -118,8 +105,6 @@ const Index = () => {
     setVideoTimestamp,
     currentVideoTime,
     setCurrentVideoTime,
-    processingStatus,
-    setProcessingStatus,
     abortController,
     setAbortController,
     isStreaming,
@@ -174,11 +159,12 @@ const Index = () => {
   const findingColors = [
     "hsl(var(--primary))",
     "hsl(var(--destructive))",
-    "hsl(var(--chart-1))",
-    "hsl(var(--chart-2))",
-    "hsl(var(--chart-3))",
-    "hsl(var(--chart-4))",
-    "hsl(var(--chart-5))",
+    "hsl(48, 96%, 53%)",
+    "hsl(142, 71%, 45%)",
+    "hsl(190, 90%, 50%)",
+    "hsl(217, 91%, 60%)",
+    "hsl(270, 95%, 60%)",
+    "hsl(330, 81%, 60%)",
   ];
 
   const handleAnalyze = async () => {
@@ -287,12 +273,13 @@ const Index = () => {
         let hasError = false;
 
         setResults((prev) => {
-          const updated = processStreamData(data, prev, (errorMsg) => {
-            setError(errorMsg);
-            hasError = true;
-          }, (status, message) => {
-            setProcessingStatus(message || null);
-          });
+          const updated = processStreamData(
+            data,
+            prev,
+            (errorMsg) => {
+              setError(errorMsg);
+              hasError = true;
+            });
           return updated;
         });
 
@@ -364,17 +351,6 @@ const Index = () => {
                   currentTime={videoTimestamp}
                   onTimeUpdate={setCurrentVideoTime}
                 />
-              </div>
-            </div>
-          )}
-
-          {processingStatus && (
-            <div className="border border-blue-500 bg-blue-50 dark:bg-blue-950 dark:border-blue-700 rounded-lg p-4 flex items-center gap-3">
-              <div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <div>
-                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                  {processingStatus}
-                </p>
               </div>
             </div>
           )}
